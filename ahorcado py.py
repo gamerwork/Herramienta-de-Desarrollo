@@ -6,6 +6,11 @@ pygame.init()
 WIDTH, HEIGHT = 600, 680
 pantalla = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Ahorcado con Pygame")
+pygame.mixer.init()
+
+sonido_inicio = pygame.mixer.Sound("sonidos/inicio.wav")
+sonido_ganar = pygame.mixer.Sound("sonidos/ganar.wav")
+sonido_perder = pygame.mixer.Sound("sonidos/termino.wav")
 
 # Colores
 BLANCO = (255, 255, 255)
@@ -70,6 +75,7 @@ def dibujar():
 
     pygame.display.flip()
 
+sonido_inicio.play()
 
 # Bucle principal
 jugando = True
@@ -89,11 +95,16 @@ while jugando:
                     intentos_restantes -= 1
 
     if '_' not in palabra_oculta:
+        sonido_ganar.play()
         print("Ganaste!")
+        pygame.time.delay(2000)  # Espera 2 segundos para que suene
         jugando = False
     elif intentos_restantes == 0:
+        sonido_perder.play()
         print(f"Perdiste! La palabra era {palabra}")
+        pygame.time.delay(2000)
         jugando = False
+
 
     dibujar()
     reloj.tick(30)
