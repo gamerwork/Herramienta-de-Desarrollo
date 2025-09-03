@@ -72,8 +72,25 @@ def dibujar():
 
     dibujar_ahorcado(intentos_restantes)
 
+    # Botón de reinicio
+    pygame.draw.rect(pantalla, (200, 200, 200), (400, 540, 150, 50))  # Botón gris
+    texto_boton = pygame.font.SysFont('arial', 24).render("Reiniciar", True, NEGRO)
+    pantalla.blit(texto_boton, (425, 555))
 
     pygame.display.flip()
+
+def reiniciar_juego():
+    global palabra, palabra_oculta, letras_adivinadas, intentos_restantes
+    palabra = random.choice(palabras)
+    palabra_oculta = ['_'] * len(palabra)
+    letras_adivinadas = set()
+    intentos_restantes = 6
+
+def mostrar_mensaje(texto, color):
+    mensaje = fuente.render(texto, True, color)
+    pantalla.blit(mensaje, (WIDTH // 2 - mensaje.get_width() // 2, 400))
+    pygame.display.flip()
+    pygame.time.delay(2000)
 
 sonido_inicio.play()
 
@@ -94,14 +111,20 @@ while jugando:
                 else:
                     intentos_restantes -= 1
 
+        elif evento.type == pygame.MOUSEBUTTONDOWN:
+            x, y = evento.pos
+            if 400 <= x <= 550 and 540 <= y <= 590:
+                reiniciar_juego()
+                sonido_inicio.play()
+
     if '_' not in palabra_oculta:
         sonido_ganar.play()
-        print("Ganaste!")
+        mostrar_mensaje("¡Ganaste!", (0, 150, 0))
         pygame.time.delay(2000)  # Espera 2 segundos para que suene
         jugando = False
     elif intentos_restantes == 0:
         sonido_perder.play()
-        print(f"Perdiste! La palabra era {palabra}")
+        mostrar_mensaje(f"¡Perdiste! Era: {palabra}", (200, 0, 0))
         pygame.time.delay(2000)
         jugando = False
 
