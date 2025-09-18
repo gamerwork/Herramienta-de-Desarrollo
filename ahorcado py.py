@@ -25,10 +25,69 @@ palabra = random.choice(palabras)
 palabra_oculta = ['_'] * len(palabra)
 letras_adivinadas = set()
 intentos_restantes = 6
+dificultad = None
+intentos_maximos = 6  # Se actualizará según la dificultad
 
 reloj = pygame.time.Clock()
 
+def mostrar_menu():
+    while True:
+        pantalla.fill((240, 248, 255))  # Fondo suave
+        titulo = fuente.render("Selecciona la Dificultad", True, (70, 90, 110))
+        pantalla.blit(titulo, (WIDTH // 2 - titulo.get_width() // 2, 100))
+
+        # Obtener posición del mouse
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Botones
+        botones = [
+            ("Normal", 6, (100, 250, 150, 60)),
+            ("Difícil", 4, (225, 350, 150, 60)),
+            ("Imposible", 2, (350, 450, 150, 60)),
+        ]
+
+        for texto, intentos, (x, y, w, h) in botones:
+            # Verificar si el mouse está encima del botón
+            if x <= mouse_pos[0] <= x + w and y <= mouse_pos[1] <= y + h:
+                color_boton = (186, 226, 199)  # Hover (verde pastel)
+            else:
+                color_boton = (180, 180, 180)  # Normal
+
+            pygame.draw.rect(pantalla, color_boton, (x, y, w, h))
+            txt = pygame.font.SysFont('arial', 24).render(texto, True, (70, 90, 110))
+            pantalla.blit(txt, (x + w // 2 - txt.get_width() // 2, y + h // 2 - txt.get_height() // 2))
+
+        pygame.display.flip()
+
+        # Manejar eventos
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = evento.pos
+                for texto, intentos, (x, y, w, h) in botones:
+                    if x <= mx <= x + w and y <= my <= y + h:
+                        return intentos
+
 def dibujar_ahorcado(intentos):
+    total_partes = 6
+    partes_a_dibujar = total_partes - intentos
+
+    if intentos_maximos == 6:
+        partes = partes_a_dibujar
+    elif intentos_maximos == 4:
+        # Dibuja 1.5 partes por intento perdido (aprox)
+        partes = round((6 / 4) * partes_a_dibujar)
+    elif intentos_maximos == 2:
+        # Dibuja 3 partes por intento perdido
+        partes = 3 * partes_a_dibujar
+    else:
+        partes = partes_a_dibujar
+
+    # Asegurarse de no pasar de 6
+    partes = min(partes, 6)
+
     # Base de la horca
     pygame.draw.line(pantalla, NEGRO, (100, 500), (300, 500), 5)  # base
     pygame.draw.line(pantalla, NEGRO, (200, 500), (200, 100), 5)  # poste vertical
@@ -56,7 +115,7 @@ def dibujar_ahorcado(intentos):
 
 
 def dibujar():
-    pantalla.fill(BLANCO)
+    pantalla.fill((240, 248, 255))
 
     # Mostrar palabra
     texto = fuente.render(' '.join(palabra_oculta), True, NEGRO)
@@ -84,7 +143,7 @@ def reiniciar_juego():
     palabra = random.choice(palabras)
     palabra_oculta = ['_'] * len(palabra)
     letras_adivinadas = set()
-    intentos_restantes = 6
+    intentos_restantes = intentos_maximos
 
 def mostrar_mensaje(texto, color):
     mensaje = fuente.render(texto, True, color)
@@ -92,7 +151,19 @@ def mostrar_mensaje(texto, color):
     pygame.display.flip()
     pygame.time.delay(2000)
 
+def mostrar_pantalla_final(mensaje_texto, color):
+    pantalla.fill(BLANCO)
+    
+    mensaje = fuente.render(mensaje_texto, True, color)
+    pantalla.blit(mensaje, (WIDTH // 2 - mensaje.get_width() // 2, HEIGHT // 2 - 50))
+
+    pygame.display.flip()
+    pygame.time.delay(1000)  # Espera 1 segundos antes de cerrar
+
 sonido_inicio.play()
+
+intentos_maximos = mostrar_menu()
+intentos_restantes = intentos_maximos
 
 # Bucle principal
 jugando = True
@@ -118,14 +189,19 @@ while jugando:
                 sonido_inicio.play()
 
     if '_' not in palabra_oculta:
-        sonido_ganar.play()
-        mostrar_mensaje("¡Ganaste!", (0, 150, 0))
-        pygame.time.delay(2000)  # Espera 2 segundos para que suene
-        jugando = False
-    elif intentos_restantes == 0:
-        sonido_perder.play()
-        mostrar_mensaje(f"¡Perdiste! Era: {palabra}", (200, 0, 0))
+        dibujar()  # Asegura que se vea el dibujo final
+        pygame.display.flip()
         pygame.time.delay(2000)
+        sonido_ganar.play()
+        mostrar_pantalla_final("¡Ganaste!", (90, 170, 120))
+        jugando = False
+
+    elif intentos_restantes == 0:
+        dibujar()  # Asegura que se vea el muñeco completo
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        sonido_perder.play()
+        mostrar_pantalla_final(f"¡Perdiste! Era: {palabra}", (200, 0, 0))
         jugando = False
 
 
