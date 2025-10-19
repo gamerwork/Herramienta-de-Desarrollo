@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import sqlite3
 
 pygame.init()
 WIDTH, HEIGHT = 600, 680
@@ -12,6 +13,14 @@ sonido_inicio = pygame.mixer.Sound("sonidos/inicio.wav")
 sonido_ganar = pygame.mixer.Sound("sonidos/ganar.wav")
 sonido_perder = pygame.mixer.Sound("sonidos/termino.wav")
 
+def obtener_palabras():
+    conexion = sqlite3.connect("palabras.db")
+    cursor = conexion.cursor()
+    cursor.execute("SELECT palabra FROM palabras")
+    resultado = cursor.fetchall()
+    conexion.close()
+    return [r[0] for r in resultado]
+
 # Colores
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
@@ -20,7 +29,7 @@ NEGRO = (0, 0, 0)
 fuente = pygame.font.SysFont('arial', 48)
 
 # Palabras
-palabras = ['python', 'programacion', 'ahorcado', 'desarrollador', 'computadora']
+palabras = obtener_palabras()
 palabra = random.choice(palabras)
 palabra_oculta = ['_'] * len(palabra)
 letras_adivinadas = set()
