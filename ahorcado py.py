@@ -79,6 +79,13 @@ def mostrar_menu():
                     if x <= mx <= x + w and y <= my <= y + h:
                         return intentos
 
+def agregar_palabra_a_bd(nueva_palabra):
+    conexion = sqlite3.connect("palabras.db")
+    cursor = conexion.cursor()
+    cursor.execute("INSERT INTO palabras (palabra) VALUES (?)", (nueva_palabra.lower(),))
+    conexion.commit()
+    conexion.close()
+
 def dibujar_ahorcado(intentos):
     total_partes = 6
     partes_a_dibujar = total_partes - intentos
@@ -174,28 +181,88 @@ sonido_inicio.play()
 intentos_maximos = mostrar_menu()
 intentos_restantes = intentos_maximos
 
+# Variables para el menú de ingreso de palabras
+mostrando_menu_agregar = False
+texto_nueva_palabra = ""
+
+def dibujar_menu_agregar():
+    # Fondo semitransparente
+    overlay = pygame.Surface((WIDTH, HEIGHT))
+    overlay.set_alpha(180)
+    overlay.fill((50, 50, 50))
+    pantalla.blit(overlay, (0, 0))
+
+    # Contenedor
+    rect_menu = pygame.Rect(WIDTH//2 - 200, HEIGHT//2 - 100, 400, 200)
+    pygame.draw.rect(pantalla, (240, 248, 255), rect_menu, border_radius=10)
+    pygame.draw.rect(pantalla, (0, 0, 0), rect_menu, 2)
+
+    # Título
+    titulo = pygame.font.SysFont('arial', 28).render("Agregar nueva palabra", True, (0, 0, 0))
+    pantalla.blit(titulo, (WIDTH//2 - titulo.get_width()//2, rect_menu.y + 20))
+
+    # Campo de texto
+    rect_input = pygame.Rect(rect_menu.x + 50, rect_menu.y + 80, 300, 40)
+    pygame.draw.rect(pantalla, (255, 255, 255), rect_input)
+    pygame.draw.rect(pantalla, (0, 0, 0), rect_input, 2)
+
+    # Texto escrito
+    texto_render = pygame.font.SysFont('arial', 28).render(texto_nueva_palabra, True, (0, 0, 0))
+    pantalla.blit(texto_render, (rect_input.x + 10, rect_input.y + 5))
+
+    # Instrucciones
+    instrucciones = pygame.font.SysFont('arial', 20).render("Enter = guardar   |   Esc = salir", True, (0, 0, 0))
+    pantalla.blit(instrucciones, (WIDTH//2 - instrucciones.get_width()//2, rect_menu.y + 140))
+
 # Bucle principal
 jugando = True
 while jugando:
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             jugando = False
-        elif evento.type == pygame.KEYDOWN:
-            letra = evento.unicode.lower()
-            if letra.isalpha() and len(letra) == 1 and letra not in letras_adivinadas:
-                letras_adivinadas.add(letra)
-                if letra in palabra:
-                    for i, l in enumerate(palabra):
-                        if l == letra:
-                            palabra_oculta[i] = letra
-                else:
-                    intentos_restantes -= 1
 
-        elif evento.type == pygame.MOUSEBUTTONDOWN:
-            x, y = evento.pos
-            if 400 <= x <= 550 and 540 <= y <= 590:
-                reiniciar_juego()
-                sonido_inicio.play()
+        # 🟡 Si está abierto el menú de agregar palabras
+        elif mostrando_menu_agregar:
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_RETURN:
+                    if texto_nueva_palabra.strip():
+                        agregar_palabra_a_bd(texto_nueva_palabra.strip())
+                        palabras = obtener_palabras()
+                    texto_nueva_palabra = ""
+                    mostrando_menu_agregar = False
+
+                elif evento.key == pygame.K_ESCAPE:
+                    texto_nueva_palabra = ""
+                    mostrando_menu_agregar = False
+
+                elif evento.key == pygame.K_BACKSPACE:
+                    texto_nueva_palabra = texto_nueva_palabra[:-1]
+
+                else:
+                    if evento.unicode.isalpha():
+                        texto_nueva_palabra += evento.unicode.lower()
+
+        # 🟢 Si está en el juego normal
+        else:
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_TAB:  # Abrir menú
+                    mostrando_menu_agregar = True
+
+                elif evento.unicode.isalpha() and len(evento.unicode) == 1 and evento.unicode.lower() not in letras_adivinadas:
+                    letra = evento.unicode.lower()
+                    letras_adivinadas.add(letra)
+                    if letra in palabra:
+                        for i, l in enumerate(palabra):
+                            if l == letra:
+                                palabra_oculta[i] = letra
+                    else:
+                        intentos_restantes -= 1
+
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
+                x, y = evento.pos
+                if 400 <= x <= 550 and 540 <= y <= 590:
+                    reiniciar_juego()
+                    sonido_inicio.play()
 
     if '_' not in palabra_oculta:
         dibujar()  # Asegura que se vea el dibujo final
@@ -214,7 +281,13 @@ while jugando:
         jugando = False
 
 
-    dibujar()
+    if mostrando_menu_agregar:
+        dibujar()
+        dibujar_menu_agregar()
+    else:
+        dibujar()
+
+    pygame.display.flip()
     reloj.tick(30)
 
 pygame.quit()
