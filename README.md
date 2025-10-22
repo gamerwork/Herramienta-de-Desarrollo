@@ -10,3 +10,10 @@ Estrategia de ramificación:
 -Hago un “merge” funsionando con mi rama secundaria.
 -Los mismos pasos hago con otra rama secundaria "feature/mejora1".
 -Igual que la anterior le hago un "merge" para que este en mi rama principal "main".
+Avance 2
+Nuevas Funciones:
+- Se hizo 3 Pull request.
+- Se esta usando herramientas de colaboración de equipo(Slack).
+- Se esta usando herramientas de actividades 
+- Release.
+- Merge conflict.
