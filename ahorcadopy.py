@@ -14,7 +14,9 @@ sonido_inicio = pygame.mixer.Sound("sonidos/inicio.wav")
 sonido_ganar = pygame.mixer.Sound("sonidos/ganar.wav")
 sonido_perder = pygame.mixer.Sound("sonidos/termino.wav")
 
-# Conecci+on con BD
+# Coneccion con BD
+
+
 def obtener_palabras():
     conexion = sqlite3.connect("palabras.db")
     cursor = conexion.cursor()
@@ -23,26 +25,28 @@ def obtener_palabras():
     conexion.close()
     return [r[0] for r in resultado]
 
+
 # Colores
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
 
-fuente = pygame.font.SysFont('arial', 48)
+fuente = pygame.font.SysFont("arial", 48)
 
 # Palabras (Se actualizará según la dificultad)
 palabras = obtener_palabras()
 palabra = random.choice(palabras)
-palabra_oculta = ['_'] * len(palabra)
+palabra_oculta = ["_"] * len(palabra)
 letras_adivinadas = set()
 intentos_restantes = 6
 dificultad = None
-intentos_maximos = 6  
+intentos_maximos = 6
 
 reloj = pygame.time.Clock()
 
+
 def mostrar_menu():
     while True:
-        pantalla.fill((240, 248, 255)) 
+        pantalla.fill((240, 248, 255))
         titulo = fuente.render("Selecciona la Dificultad", True, (70, 90, 110))
         pantalla.blit(titulo, (WIDTH // 2 - titulo.get_width() // 2, 100))
 
@@ -58,13 +62,16 @@ def mostrar_menu():
         for texto, intentos, (x, y, w, h) in botones:
             # Verificar si el mouse está encima del botón
             if x <= mouse_pos[0] <= x + w and y <= mouse_pos[1] <= y + h:
-                color_boton = (186, 226, 199)  
+                color_boton = (186, 226, 199)
             else:
-                color_boton = (180, 180, 180)  
+                color_boton = (180, 180, 180)
 
             pygame.draw.rect(pantalla, color_boton, (x, y, w, h))
-            txt = pygame.font.SysFont('arial', 24).render(texto, True, (70, 90, 110))
-            pantalla.blit(txt, (x + w // 2 - txt.get_width() // 2, y + h // 2 - txt.get_height() // 2))
+            txt = pygame.font.SysFont("arial", 24).render(texto, True, (70, 90, 110))
+            pantalla.blit(
+                txt,
+                (x + w // 2 - txt.get_width() // 2, y + h // 2 - txt.get_height() // 2),
+            )
 
         pygame.display.flip()
 
@@ -79,7 +86,10 @@ def mostrar_menu():
                     if x <= mx <= x + w and y <= my <= y + h:
                         return intentos
 
+
 # Agregar palabras al BD local
+
+
 def agregar_palabra_a_bd(nueva_palabra):
     nueva_palabra = nueva_palabra.strip().lower()
 
@@ -99,7 +109,10 @@ def agregar_palabra_a_bd(nueva_palabra):
         cursor.execute("INSERT INTO palabras (palabra) VALUES (?)", (nueva_palabra,))
         print(f"Palabra '{nueva_palabra}' agregada correctamente.")
 
+
 # Dibujar según dificultad
+
+
 def dibujar_ahorcado(intentos):
     total_partes = 6
     partes_a_dibujar = total_partes - intentos
@@ -140,37 +153,50 @@ def dibujar_ahorcado(intentos):
         # Pierna derecha
         pygame.draw.line(pantalla, NEGRO, (350, 300), (390, 350), 3)
 
-#Función de dibujar
+
+# Función de dibujar
+
+
 def dibujar():
     pantalla.fill((240, 248, 255))
 
     # Mostrar palabra
-    texto = fuente.render(' '.join(palabra_oculta), True, NEGRO)
+    texto = fuente.render(" ".join(palabra_oculta), True, NEGRO)
     pantalla.blit(texto, (100, 600))
 
     # Mostrar letras usadas
-    letras_texto = pygame.font.SysFont('arial', 24).render(f"Letras: {' '.join(sorted(letras_adivinadas))}", True, NEGRO)
+    letras_texto = pygame.font.SysFont("arial", 24).render(
+        f"Letras: {
+            ' '.join(
+                sorted(letras_adivinadas))}",
+        True,
+        NEGRO,
+    )
     pantalla.blit(letras_texto, (100, 510))
 
     # Mostrar intentos restantes
-    intentos_texto = pygame.font.SysFont('arial', 24).render(f"Intentos: {intentos_restantes}", True, NEGRO)
+    intentos_texto = pygame.font.SysFont("arial", 24).render(
+        f"Intentos: {intentos_restantes}", True, NEGRO
+    )
     pantalla.blit(intentos_texto, (100, 550))
 
     dibujar_ahorcado(intentos_restantes)
 
     # Botón de reinicio
     pygame.draw.rect(pantalla, (200, 200, 200), (400, 540, 150, 50))  # Botón gris
-    texto_boton = pygame.font.SysFont('arial', 24).render("Reiniciar", True, NEGRO)
+    texto_boton = pygame.font.SysFont("arial", 24).render("Reiniciar", True, NEGRO)
     pantalla.blit(texto_boton, (425, 555))
 
     pygame.display.flip()
 
+
 def reiniciar_juego():
     global palabra, palabra_oculta, letras_adivinadas, intentos_restantes
     palabra = random.choice(palabras)
-    palabra_oculta = ['_'] * len(palabra)
+    palabra_oculta = ["_"] * len(palabra)
     letras_adivinadas = set()
     intentos_restantes = intentos_maximos
+
 
 def mostrar_mensaje(texto, color):
     mensaje = fuente.render(texto, True, color)
@@ -178,14 +204,16 @@ def mostrar_mensaje(texto, color):
     pygame.display.flip()
     pygame.time.delay(1000)
 
+
 def mostrar_pantalla_final(mensaje_texto, color):
     pantalla.fill(BLANCO)
-    
+
     mensaje = fuente.render(mensaje_texto, True, color)
     pantalla.blit(mensaje, (WIDTH // 2 - mensaje.get_width() // 2, HEIGHT // 2 - 50))
 
     pygame.display.flip()
     pygame.time.delay(2000)  # Espera 2 segundos antes de cerrar
+
 
 sonido_inicio.play()
 
@@ -196,6 +224,7 @@ intentos_restantes = intentos_maximos
 mostrando_menu_agregar = False
 texto_nueva_palabra = ""
 
+
 def dibujar_menu_agregar():
     overlay = pygame.Surface((WIDTH, HEIGHT))
     overlay.set_alpha(180)
@@ -203,13 +232,15 @@ def dibujar_menu_agregar():
     pantalla.blit(overlay, (0, 0))
 
     # Contenedor
-    rect_menu = pygame.Rect(WIDTH//2 - 200, HEIGHT//2 - 100, 400, 200)
+    rect_menu = pygame.Rect(WIDTH // 2 - 200, HEIGHT // 2 - 100, 400, 200)
     pygame.draw.rect(pantalla, (240, 248, 255), rect_menu, border_radius=10)
     pygame.draw.rect(pantalla, (0, 0, 0), rect_menu, 2)
 
     # Título
-    titulo = pygame.font.SysFont('arial', 28).render("Agregar nueva palabra", True, (0, 0, 0))
-    pantalla.blit(titulo, (WIDTH//2 - titulo.get_width()//2, rect_menu.y + 20))
+    titulo = pygame.font.SysFont("arial", 28).render(
+        "Agregar nueva palabra", True, (0, 0, 0)
+    )
+    pantalla.blit(titulo, (WIDTH // 2 - titulo.get_width() // 2, rect_menu.y + 20))
 
     # Campo de texto
     rect_input = pygame.Rect(rect_menu.x + 50, rect_menu.y + 80, 300, 40)
@@ -217,11 +248,18 @@ def dibujar_menu_agregar():
     pygame.draw.rect(pantalla, (0, 0, 0), rect_input, 2)
 
     # Texto escrito
-    texto_render = pygame.font.SysFont('arial', 28).render(texto_nueva_palabra, True, (0, 0, 0))
+    texto_render = pygame.font.SysFont("arial", 28).render(
+        texto_nueva_palabra, True, (0, 0, 0)
+    )
     pantalla.blit(texto_render, (rect_input.x + 10, rect_input.y + 5))
 
-    instrucciones = pygame.font.SysFont('arial', 20).render("Enter = guardar   |   Esc = salir", True, (0, 0, 0))
-    pantalla.blit(instrucciones, (WIDTH//2 - instrucciones.get_width()//2, rect_menu.y + 140))
+    instrucciones = pygame.font.SysFont("arial", 20).render(
+        "Enter = guardar   |   Esc = salir", True, (0, 0, 0)
+    )
+    pantalla.blit(
+        instrucciones, (WIDTH // 2 - instrucciones.get_width() // 2, rect_menu.y + 140)
+    )
+
 
 # Bucle principal
 jugando = True
@@ -251,13 +289,17 @@ while jugando:
                     if evento.unicode.isalpha():
                         texto_nueva_palabra += evento.unicode.lower()
 
-        # Si está en el juego normal 
+        # Si está en el juego normal
         else:
             if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_TAB:  
+                if evento.key == pygame.K_TAB:
                     mostrando_menu_agregar = True
 
-                elif evento.unicode.isalpha() and len(evento.unicode) == 1 and evento.unicode.lower() not in letras_adivinadas:
+                elif (
+                    evento.unicode.isalpha()
+                    and len(evento.unicode) == 1
+                    and evento.unicode.lower() not in letras_adivinadas
+                ):
                     letra = evento.unicode.lower()
                     letras_adivinadas.add(letra)
                     if letra in palabra:
@@ -273,8 +315,8 @@ while jugando:
                     reiniciar_juego()
                     sonido_inicio.play()
 
-    if '_' not in palabra_oculta:
-        dibujar()  
+    if "_" not in palabra_oculta:
+        dibujar()
         pygame.display.flip()
         pygame.time.delay(2000)
         sonido_ganar.play()
@@ -283,13 +325,12 @@ while jugando:
 
     # Asegurar que se vea el muñeco completo
     elif intentos_restantes == 0:
-        dibujar()  
+        dibujar()
         pygame.display.flip()
         pygame.time.delay(2000)
         sonido_perder.play()
         mostrar_pantalla_final(f"¡Perdiste! Era: {palabra}", (200, 0, 0))
         jugando = False
-
 
     if mostrando_menu_agregar:
         dibujar_menu_agregar()
