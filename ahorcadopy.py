@@ -166,11 +166,7 @@ def dibujar():
 
     # Mostrar letras usadas
     letras_texto = pygame.font.SysFont("arial", 24).render(
-        f"Letras: {
-            ' '.join(
-                sorted(letras_adivinadas))}",
-        True,
-        NEGRO,
+        f"Letras: {' '.join(sorted(letras_adivinadas))}",True,NEGRO,
     )
     pantalla.blit(letras_texto, (100, 510))
 
