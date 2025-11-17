@@ -1,7 +1,9 @@
-import pygame
+import math
 import random
-import sys
 import sqlite3
+import sys
+
+import pygame
 
 pygame.init()
 WIDTH, HEIGHT = 600, 680
@@ -42,6 +44,14 @@ dificultad = None
 intentos_maximos = 6
 
 reloj = pygame.time.Clock()
+
+# Animación del fondo
+sol_angulo = 0
+nubes = [
+    {"x": 50, "y": 80, "vel": 1},
+    {"x": 300, "y": 120, "vel": 0.8},
+    {"x": -150, "y": 60, "vel": 1.2},
+]
 
 
 def mostrar_menu():
@@ -154,11 +164,72 @@ def dibujar_ahorcado(intentos):
         pygame.draw.line(pantalla, NEGRO, (350, 300), (390, 350), 3)
 
 
+def dibujar_sol():
+    global sol_angulo
+
+    # Posición fija del sol
+    x = 500
+    y = 100
+    radio_sol = 40
+    longitud_rayo = 20
+    cantidad_rayos = 12  # 12 palitos alrededor
+
+    # Incrementar el ángulo para animar rotación
+    sol_angulo = (sol_angulo + 2) % 360  # velocidad de giro
+
+    # Dibujar el sol
+    pygame.draw.circle(pantalla, (255, 223, 0), (x, y), radio_sol)
+
+    # Dibujar rayos/palitos
+    for i in range(cantidad_rayos):
+        angulo = math.radians(i * (360 / cantidad_rayos) + sol_angulo)
+
+        # Punto inicial del rayo (borde del sol)
+        x1 = x + math.cos(angulo) * radio_sol
+        y1 = y + math.sin(angulo) * radio_sol
+
+        # Punto final del rayo
+        x2 = x + math.cos(angulo) * (radio_sol + longitud_rayo)
+        y2 = y + math.sin(angulo) * (radio_sol + longitud_rayo)
+
+        # Dibujar línea del rayo
+        pygame.draw.line(pantalla, (255, 200, 0), (x1, y1), (x2, y2), 4)
+
+
+def dibujar_nubes():
+    for nube in nubes:
+        # Dibujar nube (varios círculos)
+        pygame.draw.circle(pantalla, (255, 255, 255), (nube["x"], nube["y"]), 25)
+        pygame.draw.circle(
+            pantalla, (255, 255, 255), (nube["x"] + 30, nube["y"] + 10), 30
+        )
+        pygame.draw.circle(
+            pantalla, (255, 255, 255), (nube["x"] - 30, nube["y"] + 10), 30
+        )
+
+        # Movimiento
+        nube["x"] += nube["vel"]
+
+        # Si la nube sale de la pantalla, regresa por la izquierda
+        if nube["x"] > WIDTH + 50:
+            nube["x"] = -50
+
+
+def dibujar_pasto():
+    pygame.draw.rect(pantalla, (50, 180, 80), (0, 450, WIDTH, 230))
+
+
 # Función de dibujar
 
 
 def dibujar():
-    pantalla.fill((240, 248, 255))
+    # Fondo azul suave
+    pantalla.fill((135, 206, 250))
+
+    # --- Dibujar fondo animado ---
+    dibujar_sol()
+    dibujar_nubes()
+    dibujar_pasto()
 
     # Mostrar palabra
     texto = fuente.render(" ".join(palabra_oculta), True, NEGRO)
@@ -166,7 +237,9 @@ def dibujar():
 
     # Mostrar letras usadas
     letras_texto = pygame.font.SysFont("arial", 24).render(
-        f"Letras: {' '.join(sorted(letras_adivinadas))}", True, NEGRO,
+        f"Letras: {' '.join(sorted(letras_adivinadas))}",
+        True,
+        NEGRO,
     )
     pantalla.blit(letras_texto, (100, 510))
 
