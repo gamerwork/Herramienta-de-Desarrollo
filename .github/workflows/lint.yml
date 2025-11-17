@@ -2,27 +2,27 @@ name: Lint Code
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository code
+      - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
-          pip install flake8
+          pip install -r requirements-dev.txt || true
+          pip install pre-commit
 
-      - name: Run linter
-        run: |
-          flake8 . --max-line-length=88
+      - name: Run pre-commit
+        run: pre-commit run --all-files
