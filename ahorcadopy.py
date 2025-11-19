@@ -1,8 +1,9 @@
 import math
+import os
 import random
 import sqlite3
 import sys
-import os
+
 import pygame
 
 os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -123,6 +124,7 @@ def agregar_palabra_a_bd(nueva_palabra):
 
 
 # Dibujar según dificultad
+# Hay 3 dificultades
 
 
 def dibujar_ahorcado(intentos):
