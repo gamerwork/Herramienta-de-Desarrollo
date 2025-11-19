@@ -1,7 +1,11 @@
 # test
+import os
 import sqlite3
+import sys
 
 from ahorcadopy import agregar_palabra_a_bd, obtener_palabras
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 def setup_module(module):
