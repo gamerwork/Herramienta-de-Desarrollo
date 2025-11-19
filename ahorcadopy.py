@@ -2,7 +2,7 @@ import math
 import random
 import sqlite3
 import sys
-
+os.environ["SDL_AUDIODRIVER"] = "dummy"
 import pygame
 
 pygame.init()
