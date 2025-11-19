@@ -1,6 +1,5 @@
 # test
 import os
-import sqlite3
 import sys
 
 from ahorcadopy import agregar_palabra_a_bd
