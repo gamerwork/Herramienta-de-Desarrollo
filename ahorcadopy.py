@@ -3,10 +3,9 @@ import random
 import sqlite3
 import sys
 import os
+import pygame
 
 os.environ["SDL_AUDIODRIVER"] = "dummy"
-
-import pygame
 
 pygame.init()
 WIDTH, HEIGHT = 600, 680
