@@ -124,7 +124,6 @@ def agregar_palabra_a_bd(nueva_palabra):
 
 
 # Dibujar según dificultad
-# Hay 3 dificultades
 
 
 def dibujar_ahorcado(intentos):
